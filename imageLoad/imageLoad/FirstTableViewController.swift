@@ -1,5 +1,5 @@
 //
-//  TableViewController.swift
+//  FirstTableViewController.swift
 //  imageLoad
 //
 //  Created by seven on 2018/2/27.
@@ -8,10 +8,7 @@
 
 import UIKit
 import Kingfisher
-/***
- 按下面这个方法做就是将Kingfisher当成一个图片下载器，还把Kingfisher设计的内存处理都废弃了，虽然看上去好像不用再重新加载被删除的图片，但实则牺牲了很多内存
- **/
-class TableViewController: UITableViewController {
+class FirstTableViewController: UITableViewController {
     let imageUrls = ["http://pic8.nipic.com/20100801/387600_002750589396_2.jpg",
                      "http://pic40.nipic.com/20140412/11857649_170524977000_2.jpg",
                      "http://pic12.photophoto.cn/20090910/0005018303466977_b.jpg",
@@ -28,32 +25,26 @@ class TableViewController: UITableViewController {
                      "http://pic.35pic.com/normal/08/41/68/12095453_195255558000_2.jpg",
                      "http://pic.58pic.com/58pic/11/11/21/71T58PICzSB.jpg",
                      "http://pic54.nipic.com/file/20141202/19938643_174717192175_2.jpg"]
-    var images = [Any]()
     override func viewDidLoad() {
         super.viewDidLoad()
-        imageUrls.forEach {[weak self] (item) in
-            self?.images.append(item)
-        }
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 44
         // Uncomment the following line to preserve selection between presentations
-//         self.clearsSelectionOnViewWillAppear = false
+        // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
     @IBAction func clear(_ sender: UIBarButtonItem) {
-        KingfisherManager.shared.cache.clearDiskCache()
         KingfisherManager.shared.cache.clearMemoryCache()
         print("=====清空完成=====")
         tableView.reloadData()
     }
-    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -70,25 +61,58 @@ class TableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         let row = indexPath.row
         guard let url = URL.init(string: imageUrls[row]) else { return cell }
+        ///Kingfisher 默认缓存key就是url
         
-        if images.count > row, let img = images[row] as? UIImage {
-            print("=====数组中已有图片====")
-            cell.imageView?.image = img
-        }else{
-            print("=====数组中没有图片====")
-            cell.imageView?.kf.setImage(with: url, placeholder: #imageLiteral(resourceName: "placeholder"), options: nil, progressBlock: nil, completionHandler: {[weak self] (image, _, _, _) in
-                if let img = image {
-                    print("==\(row)===图片下载成功=\(img.size)===")
-                    self?.images.remove(at: row)
-                    self?.images.insert(img, at: row)
-                }else{
-                    print("==\(row)===图片下载失败====")
+        ///下面这个方法仅仅只能解决因为服务端的图片过大，导致app这边内存频繁到达临界点而被清理，因而图片会多次下载的情况（如果服务端提供的图片过大，这个方法只是辅助性的，但是治标不治本，要在根本上解决问题任需服务端提供缩略图）
+        /// 换句话说以下的方法仅能解决app上关于图片的内存问题，但并不能解决图片加载速度的问题
+        KingfisherManager.shared.retrieveImage(with: url, options: nil, progressBlock: { (_, _) in
+            print("====loading===")
+        }) { (image, error, cacheType, _) in
+            if let img = image {
+                
+                switch cacheType {
+                case .disk:
+                    cell.imageView?.image = img
+                    print("==\(row)===disk=\(img.size)=cell.imageView=\(cell.imageView?.image?.size ?? CGSize.zero)==")
+                case .memory:
+                    let resize = CGSize.init(width: 100, height: 100)
+                    if img.size != resize {
+                        let resizedImage = img.kf.resize(to: CGSize.init(width: 100, height: 100))
+                        let imageCache = ImageCache.default
+                        let serializer = DefaultCacheSerializer.default
+                        //替换memory和disk中的大图
+                        imageCache.store(resizedImage, original: UIImagePNGRepresentation(img), forKey: url.absoluteString, processorIdentifier: "", cacheSerializer: serializer, toDisk: true, completionHandler: {
+                            print("==\(row)===缓存图片替换成功====")
+                        })
+                        cell.imageView?.image = resizedImage
+                    }else{
+                        cell.imageView?.image = img
+                    }
+                    print("==\(row)===memory=\(img.size)=cell.imageView=\(cell.imageView?.image?.size ?? CGSize.zero)==")
+                case .none:
+                    let resize = CGSize.init(width: 100, height: 100)
+                    if img.size != resize {
+                        let resizedImage = img.kf.resize(to: CGSize.init(width: 100, height: 100))
+                        let imageCache = ImageCache.default
+                        let serializer = DefaultCacheSerializer.default
+                        
+                        imageCache.store(resizedImage, original: UIImagePNGRepresentation(img), forKey: url.absoluteString, processorIdentifier: "", cacheSerializer: serializer, toDisk: true, completionHandler: {
+                            print("==\(row)===图片保存成功====")
+                        })
+                        cell.imageView?.image = resizedImage
+                    }else{
+                        cell.imageView?.image = img
+                    }
+                    print("==\(row)===图片下载成功=\(img.size)=cell.imageView=\(cell.imageView?.image?.size ?? CGSize.zero)==")
                 }
-            })
-            
+            }else{
+                print("==\(row)===图片下载失败====")
+            }
         }
         return cell
     }
+    
+    
 
     /*
     // Override to support conditional editing of the table view.
