@@ -1,17 +1,14 @@
 //
-//  TableViewController.swift
+//  ThirdTableViewController.swift
 //  imageLoad
 //
-//  Created by seven on 2018/2/27.
+//  Created by seven on 2018/2/28.
 //  Copyright © 2018年 seven. All rights reserved.
 //
 
 import UIKit
 import Kingfisher
-/***
- 按下面这个方法做就是将Kingfisher当成一个图片下载器，还把Kingfisher设计的内存处理都废弃了，虽然看上去好像不用再重新加载被删除的图片，但实则牺牲了很多内存
- **/
-class TableViewController: UITableViewController {
+class ThirdTableViewController: UITableViewController {
     let imageUrls = ["http://pic8.nipic.com/20100801/387600_002750589396_2.jpg",
                      "http://pic40.nipic.com/20140412/11857649_170524977000_2.jpg",
                      "http://pic12.photophoto.cn/20090910/0005018303466977_b.jpg",
@@ -28,37 +25,26 @@ class TableViewController: UITableViewController {
                      "http://pic.35pic.com/normal/08/41/68/12095453_195255558000_2.jpg",
                      "http://pic.58pic.com/58pic/11/11/21/71T58PICzSB.jpg",
                      "http://pic54.nipic.com/file/20141202/19938643_174717192175_2.jpg"]
-    var images = [Any]()
     override func viewDidLoad() {
         super.viewDidLoad()
-        imageUrls.forEach {[weak self] (item) in
-            self?.images.append(item)
-        }
         tableView.rowHeight = UITableViewAutomaticDimension
         tableView.estimatedRowHeight = 44
         // Uncomment the following line to preserve selection between presentations
-//         self.clearsSelectionOnViewWillAppear = false
+        // self.clearsSelectionOnViewWillAppear = false
 
         // Uncomment the following line to display an Edit button in the navigation bar for this view controller.
         // self.navigationItem.rightBarButtonItem = self.editButtonItem
     }
-
-    override func viewWillDisappear(_ animated: Bool) {
-        super.viewWillDisappear(animated)
+    @IBAction func clear(_ sender: UIBarButtonItem) {
         KingfisherManager.shared.cache.clearMemoryCache()
-        KingfisherManager.shared.cache.clearDiskCache()
+        print("=====清空完成=====")
+        tableView.reloadData()
     }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
-    @IBAction func clear(_ sender: UIBarButtonItem) {
-        KingfisherManager.shared.cache.clearDiskCache()
-        KingfisherManager.shared.cache.clearMemoryCache()
-        print("=====清空完成=====")
-        tableView.reloadData()
-    }
-    
+
     // MARK: - Table view data source
 
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -75,23 +61,24 @@ class TableViewController: UITableViewController {
         let cell = tableView.dequeueReusableCell(withIdentifier: "cell", for: indexPath)
         let row = indexPath.row
         guard let url = URL.init(string: imageUrls[row]) else { return cell }
-        
-        if images.count > row, let img = images[row] as? UIImage {
-            print("=====数组中已有图片====")
-            cell.imageView?.image = img
-        }else{
-            print("=====数组中没有图片====")
-            cell.imageView?.kf.setImage(with: url, placeholder: #imageLiteral(resourceName: "placeholder"), options: nil, progressBlock: nil, completionHandler: {[weak self] (image, _, _, _) in
-                if let img = image {
-                    print("==\(row)===图片下载成功=\(img.size)===")
-                    self?.images.remove(at: row)
-                    self?.images.insert(img, at: row)
-                }else{
-                    print("==\(row)===图片下载失败====")
+        KingfisherManager.shared.retrieveImage(with: url, imageResize: CGSize.init(width: 100, height: 100), options: nil, progressBlock: nil) { (image, error, cacheType, _) in
+            if let img = image {
+                switch cacheType {
+                case .disk:
+                    cell.imageView?.image = img
+                    print("==\(row)===disk=\(img.size)=cell.imageView=\(cell.imageView?.image?.size ?? CGSize.zero)==")
+                case .memory:
+                    cell.imageView?.image = img
+                    print("==\(row)===memory=\(img.size)=cell.imageView=\(cell.imageView?.image?.size ?? CGSize.zero)==")
+                case .none:
+                    cell.imageView?.image = img
+                    print("==\(row)===none=\(img.size)=cell.imageView=\(cell.imageView?.image?.size ?? CGSize.zero)==")
                 }
-            })
-            
+            }else{
+                print("==\(row)===图片下载失败====")
+            }
         }
+
         return cell
     }
 

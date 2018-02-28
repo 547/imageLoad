@@ -15,6 +15,9 @@
 		14830990204553D200EEB03B /* imageLoadUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1483098F204553D200EEB03B /* imageLoadUITests.swift */; };
 		1483099E204555FA00EEB03B /* TableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1483099D204555FA00EEB03B /* TableViewController.swift */; };
 		148309A020456EDC00EEB03B /* FirstTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1483099F20456EDC00EEB03B /* FirstTableViewController.swift */; };
+		148FDDDD2046564C003146AE /* KingfisherExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148FDDDC2046564C003146AE /* KingfisherExtension.swift */; };
+		148FDDDF20466113003146AE /* SecondTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148FDDDE20466113003146AE /* SecondTableViewController.swift */; };
+		148FDDE12046793B003146AE /* ThirdTableViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148FDDE02046793B003146AE /* ThirdTableViewController.swift */; };
 		F9ED19779BA2F71901799FB7 /* Pods_imageLoad.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 81B344723A7537262139963C /* Pods_imageLoad.framework */; };
 /* End PBXBuildFile section */
 
@@ -50,6 +53,9 @@
 		14830991204553D200EEB03B /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		1483099D204555FA00EEB03B /* TableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TableViewController.swift; sourceTree = "<group>"; };
 		1483099F20456EDC00EEB03B /* FirstTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FirstTableViewController.swift; sourceTree = "<group>"; };
+		148FDDDC2046564C003146AE /* KingfisherExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KingfisherExtension.swift; sourceTree = "<group>"; };
+		148FDDDE20466113003146AE /* SecondTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SecondTableViewController.swift; sourceTree = "<group>"; };
+		148FDDE02046793B003146AE /* ThirdTableViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ThirdTableViewController.swift; sourceTree = "<group>"; };
 		29353279080F5FA5DCCE3FCD /* Pods-imageLoad.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-imageLoad.debug.xcconfig"; path = "Pods/Target Support Files/Pods-imageLoad/Pods-imageLoad.debug.xcconfig"; sourceTree = "<group>"; };
 		81B344723A7537262139963C /* Pods_imageLoad.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_imageLoad.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		880380463253D38661B89A37 /* Pods-imageLoad.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-imageLoad.release.xcconfig"; path = "Pods/Target Support Files/Pods-imageLoad/Pods-imageLoad.release.xcconfig"; sourceTree = "<group>"; };
@@ -109,10 +115,13 @@
 				1483096F204553D200EEB03B /* AppDelegate.swift */,
 				1483099D204555FA00EEB03B /* TableViewController.swift */,
 				1483099F20456EDC00EEB03B /* FirstTableViewController.swift */,
+				148FDDDE20466113003146AE /* SecondTableViewController.swift */,
+				148FDDE02046793B003146AE /* ThirdTableViewController.swift */,
 				14830973204553D200EEB03B /* Main.storyboard */,
 				14830976204553D200EEB03B /* Assets.xcassets */,
 				14830978204553D200EEB03B /* LaunchScreen.storyboard */,
 				1483097B204553D200EEB03B /* Info.plist */,
+				148FDDDC2046564C003146AE /* KingfisherExtension.swift */,
 			);
 			path = imageLoad;
 			sourceTree = "<group>";
@@ -345,7 +354,10 @@
 			files = (
 				1483099E204555FA00EEB03B /* TableViewController.swift in Sources */,
 				14830970204553D200EEB03B /* AppDelegate.swift in Sources */,
+				148FDDDF20466113003146AE /* SecondTableViewController.swift in Sources */,
 				148309A020456EDC00EEB03B /* FirstTableViewController.swift in Sources */,
+				148FDDDD2046564C003146AE /* KingfisherExtension.swift in Sources */,
+				148FDDE12046793B003146AE /* ThirdTableViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

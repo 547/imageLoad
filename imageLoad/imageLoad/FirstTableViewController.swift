@@ -44,6 +44,11 @@ class FirstTableViewController: UITableViewController {
         super.didReceiveMemoryWarning()
         // Dispose of any resources that can be recreated.
     }
+    override func viewWillDisappear(_ animated: Bool) {
+        super.viewWillDisappear(animated)
+        KingfisherManager.shared.cache.clearMemoryCache()
+        KingfisherManager.shared.cache.clearDiskCache()
+    }
 
     // MARK: - Table view data source
 
@@ -63,48 +68,26 @@ class FirstTableViewController: UITableViewController {
         guard let url = URL.init(string: imageUrls[row]) else { return cell }
         ///Kingfisher 默认缓存key就是url
         
-        ///下面这个方法仅仅只能解决因为服务端的图片过大，导致app这边内存频繁到达临界点而被清理，因而图片会多次下载的情况（如果服务端提供的图片过大，这个方法只是辅助性的，但是治标不治本，要在根本上解决问题任需服务端提供缩略图）
+        ///下面这个方法仅仅只能解决因为服务端的图片过大，导致app这边内存频繁到达临界点已下载的图片被清理，因而图片会多次下载的情况（如果服务端提供的图片过大，这个方法只是辅助性的，但是治标不治本，要在根本上解决问题任需服务端提供缩略图）
         /// 换句话说以下的方法仅能解决app上关于图片的内存问题，但并不能解决图片加载速度的问题
         KingfisherManager.shared.retrieveImage(with: url, options: nil, progressBlock: { (_, _) in
             print("====loading===")
         }) { (image, error, cacheType, _) in
             if let img = image {
-                
-                switch cacheType {
-                case .disk:
+                let resize = CGSize.init(width: 100, height: 100)
+                if img.size != resize {
+                    let resizedImage = img.kf.resize(to: CGSize.init(width: 100, height: 100))
+                    let imageCache = ImageCache.default
+                    let serializer = DefaultCacheSerializer.default
+                    //替换memory和disk中的大图
+                    imageCache.store(resizedImage, original: UIImagePNGRepresentation(img), forKey: url.absoluteString, processorIdentifier: "", cacheSerializer: serializer, toDisk: true, completionHandler: {
+                        print("==\(row)===缓存图片替换成功====")
+                    })
+                    cell.imageView?.image = resizedImage
+                }else{
                     cell.imageView?.image = img
-                    print("==\(row)===disk=\(img.size)=cell.imageView=\(cell.imageView?.image?.size ?? CGSize.zero)==")
-                case .memory:
-                    let resize = CGSize.init(width: 100, height: 100)
-                    if img.size != resize {
-                        let resizedImage = img.kf.resize(to: CGSize.init(width: 100, height: 100))
-                        let imageCache = ImageCache.default
-                        let serializer = DefaultCacheSerializer.default
-                        //替换memory和disk中的大图
-                        imageCache.store(resizedImage, original: UIImagePNGRepresentation(img), forKey: url.absoluteString, processorIdentifier: "", cacheSerializer: serializer, toDisk: true, completionHandler: {
-                            print("==\(row)===缓存图片替换成功====")
-                        })
-                        cell.imageView?.image = resizedImage
-                    }else{
-                        cell.imageView?.image = img
-                    }
-                    print("==\(row)===memory=\(img.size)=cell.imageView=\(cell.imageView?.image?.size ?? CGSize.zero)==")
-                case .none:
-                    let resize = CGSize.init(width: 100, height: 100)
-                    if img.size != resize {
-                        let resizedImage = img.kf.resize(to: CGSize.init(width: 100, height: 100))
-                        let imageCache = ImageCache.default
-                        let serializer = DefaultCacheSerializer.default
-                        
-                        imageCache.store(resizedImage, original: UIImagePNGRepresentation(img), forKey: url.absoluteString, processorIdentifier: "", cacheSerializer: serializer, toDisk: true, completionHandler: {
-                            print("==\(row)===图片保存成功====")
-                        })
-                        cell.imageView?.image = resizedImage
-                    }else{
-                        cell.imageView?.image = img
-                    }
-                    print("==\(row)===图片下载成功=\(img.size)=cell.imageView=\(cell.imageView?.image?.size ?? CGSize.zero)==")
                 }
+                print("==\(row)===\(img.size)=cell.imageView=\(cell.imageView?.image?.size ?? CGSize.zero)==")
             }else{
                 print("==\(row)===图片下载失败====")
             }
