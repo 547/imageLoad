@@ -74,9 +74,11 @@ class FirstTableViewController: UITableViewController {
             print("====loading===")
         }) { (image, error, cacheType, _) in
             if let img = image {
+                print("==\(row)===原图大小 \(UIImagePNGRepresentation(img)?.count ?? 0)====")
                 let resize = CGSize.init(width: 100, height: 100)
                 if img.size != resize {
                     let resizedImage = img.kf.resize(to: CGSize.init(width: 100, height: 100))
+                    print("==\(row)===小图大小 \(UIImagePNGRepresentation(resizedImage)?.count ?? 0)====")
                     let imageCache = ImageCache.default
                     let serializer = DefaultCacheSerializer.default
                     //替换memory和disk中的大图
